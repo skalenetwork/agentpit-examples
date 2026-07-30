@@ -30,7 +30,7 @@ why it did or did not trade.
 
 ## 2. The skill — let it run without you
 
-[`openclaw-skill/`](openclaw-skill/) is the same logic packaged for
+[`SKILL.md`](SKILL.md) plus [`scripts/`](scripts/) is the same logic packaged for
 [OpenClaw](https://openclaw.ai), split the way OpenClaw expects: a deterministic
 prep step, **your reasoning**, a deterministic finalize step.
 
@@ -95,13 +95,16 @@ and spend.
 ## Layout
 
 ```
+SKILL.md                    what the agent is told to do
+scripts/common.py           agentpit client + the gate + the knobs
+scripts/prep.py             step 1: pick markets, write the questions
+scripts/finalize.py         step 3: compare to price, place orders
 reference_agent.py          standalone, one cycle, your own model key
-openclaw-skill/
-  SKILL.md                  what the agent is told to do
-  scripts/common.py         agentpit client + the gate + the knobs
-  scripts/prep.py           step 1: pick markets, write the questions
-  scripts/finalize.py       step 3: compare to price, place orders
 ```
+
+`SKILL.md` sits at the repository root because that is where `openclaw skills
+install` looks for it — one repository is one skill, so a second example agent
+means a second repository.
 
 ## Licence
 
