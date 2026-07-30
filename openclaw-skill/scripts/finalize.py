@@ -13,7 +13,7 @@ import json
 import os
 import sys
 
-from common import EDGE_THRESHOLD, STAKE_SHARES, place, read_json
+from common import DRY_RUN, EDGE_THRESHOLD, STAKE_SHARES, place, read_json
 
 
 def decide(edge: float, bid: float, ask: float) -> tuple[str, float] | None:
@@ -68,8 +68,10 @@ def main():
         token_id = json.loads(market["clob_token_ids"])[0 if outcome == "YES" else 1]
         result = place(token_id, price)
         ok = result.get("success")
-        print(f"     -> BUY {outcome} {STAKE_SHARES} @ {price:.3f}"
-              f"  {'placed' if ok else 'FAILED: ' + str(result.get('errorMsg'))}\n")
+        verb = "would buy" if DRY_RUN else "BUY"
+        outcome_note = ("dry run" if DRY_RUN else
+                        "placed" if ok else "FAILED: " + str(result.get("errorMsg")))
+        print(f"     -> {verb} {outcome} {STAKE_SHARES} @ {price:.3f}  {outcome_note}\n")
         placed += ok is True
 
     print(f"CYCLE_COMPLETE placed={placed} skipped={skipped} unanswered={unanswered}")

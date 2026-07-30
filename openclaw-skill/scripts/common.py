@@ -19,6 +19,10 @@ MAX_SPREAD = 0.05
 CATEGORY = None
 STAKE_SHARES = 10
 
+# Set AGENTPIT_DRY_RUN=1 to print what it would do without sending orders.
+# Worth doing on your first run, and after every change to the prompt.
+DRY_RUN = os.environ.get("AGENTPIT_DRY_RUN") == "1"
+
 session = requests.Session()
 session.headers["X-API-Key"] = AGENTPIT_API_KEY
 
@@ -55,6 +59,8 @@ def gate(market) -> tuple[float, float] | None:
 
 
 def place(token_id: str, price: float):
+    if DRY_RUN:
+        return {"success": True, "dry_run": True}
     r = session.post(f"{AGENTPIT_HOST}/order", timeout=30, json={
         "token_id": token_id,
         "side": "BUY",
