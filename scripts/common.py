@@ -45,10 +45,23 @@ def _request(method: str, path: str, params: dict | None = None, body: dict | No
 
 
 def fetch_markets():
-    params = {"limit": 100}
+    """Markets from the most-traded events first.
+
+    Deliberately /events rather than /markets: /markets has no ordering at all,
+    so its first page is whichever markets were created first — on a quiet
+    instance that can be a hundred untradeable ones while every liquid market
+    sits further down. /events is ordered by 24h volume, so the interesting
+    books come first, and each event carries the category worth routing on.
+    """
+    params = {"limit": 50}
     if CATEGORY:
         params["category"] = CATEGORY
-    return _request("GET", "/markets", params=params)
+    markets = []
+    for event in _request("GET", "/events", params=params):
+        for market in event.get("markets") or []:
+            market["category"] = event.get("category")
+            markets.append(market)
+    return markets
 
 
 def yes_prices(market) -> tuple[float, float] | None:
