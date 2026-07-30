@@ -44,9 +44,18 @@ def main():
             continue
 
         try:
-            probability = float(read_json(answer_path)["probability"])
-        except (ValueError, KeyError, TypeError, json.JSONDecodeError):
+            raw = read_json(answer_path)["probability"]
+        except (KeyError, json.JSONDecodeError):
             unanswered += 1              # a malformed answer is a skip, never a trade
+            continue
+        if raw is None:                  # the agent abstained — see SKILL.md
+            print(f"  {market['question'][:60]}\n     no view, skip\n")
+            skipped += 1
+            continue
+        try:
+            probability = float(raw)
+        except (ValueError, TypeError):
+            unanswered += 1
             continue
         if not 0.0 <= probability <= 1.0:
             unanswered += 1
@@ -74,7 +83,8 @@ def main():
         print(f"     -> {verb} {outcome} {STAKE_SHARES} @ {price:.3f}  {outcome_note}\n")
         placed += ok is True
 
-    print(f"CYCLE_COMPLETE placed={placed} skipped={skipped} unanswered={unanswered}")
+    verb = "would_place" if DRY_RUN else "placed"
+    print(f"CYCLE_COMPLETE {verb}={placed} skipped={skipped} unanswered={unanswered}")
 
 
 if __name__ == "__main__":

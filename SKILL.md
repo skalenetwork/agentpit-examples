@@ -46,15 +46,21 @@ For EACH `<cycle_dir>/ask_*.json`:
 {"probability": 0.0, "why": "<one short sentence>"}
 ```
 
+Use `"probability": null` when you have no real basis for a view — an unfamiliar
+team, a name you do not recognise, a resolution rule you cannot parse. That is
+a skip, and it is the right answer more often than it feels.
+
 **You are not shown the market price, and that is deliberate.** Given the
 price, a model drifts toward it and reports back a number close to the one it
 was meant to challenge — which looks like agreement and is really an echo. Your
 estimate is only worth something if you formed it independently. Step 3
 compares the two.
 
-If you genuinely have no basis for a question, still answer with your honest
-prior. Do not guess a number to look decisive — a weak estimate near the market
-price simply produces no trade, which is the correct outcome.
+**"I have no idea" is not 0.5.** This is the trap. Answer 0.5 on a market
+priced at 0.78 and step 3 reads a 28-point disagreement and bets hard against
+the crowd — on a question you just admitted you know nothing about. The price
+got there because someone did know something. Ignorance is `null`; 0.5 is a
+genuine claim that the thing is a coin flip.
 
 ## Step 3 — Finalize
 
