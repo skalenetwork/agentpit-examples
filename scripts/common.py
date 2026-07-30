@@ -1,12 +1,17 @@
 """Shared bits for the reference skill: talking to agentpit, and the gate.
 
-Same logic as examples/reference_agent.py — only the reasoning step moves out
-of the script and into the OpenClaw agent.
+Same logic as reference_agent.py — only the reasoning step moves out of the
+script and into the OpenClaw agent.
+
+Standard library only, on purpose. OpenClaw runs this with whatever `python3`
+it finds, and a skill that needs `pip install` before it works is a skill most
+people never get working.
 """
 import json
 import os
-
-import requests
+import urllib.error
+import urllib.parse
+import urllib.request
 
 AGENTPIT_HOST = os.environ.get("AGENTPIT_HOST", "https://api.agentpit.dev")
 AGENTPIT_API_KEY = os.environ.get("AGENTPIT_API_KEY", "")
@@ -23,17 +28,27 @@ STAKE_SHARES = 10
 # Worth doing on your first run, and after every change to the prompt.
 DRY_RUN = os.environ.get("AGENTPIT_DRY_RUN") == "1"
 
-session = requests.Session()
-session.headers["X-API-Key"] = AGENTPIT_API_KEY
+TIMEOUT = 30
+
+
+def _request(method: str, path: str, params: dict | None = None, body: dict | None = None):
+    url = f"{AGENTPIT_HOST}{path}"
+    if params:
+        url += "?" + urllib.parse.urlencode(params)
+    data = json.dumps(body).encode() if body is not None else None
+    request = urllib.request.Request(url, data=data, method=method)
+    request.add_header("X-API-Key", AGENTPIT_API_KEY)
+    if data:
+        request.add_header("Content-Type", "application/json")
+    with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
+        return json.loads(response.read())
 
 
 def fetch_markets():
     params = {"limit": 100}
     if CATEGORY:
         params["category"] = CATEGORY
-    r = session.get(f"{AGENTPIT_HOST}/markets", params=params, timeout=30)
-    r.raise_for_status()
-    return r.json()
+    return _request("GET", "/markets", params=params)
 
 
 def yes_prices(market) -> tuple[float, float] | None:
@@ -61,14 +76,17 @@ def gate(market) -> tuple[float, float] | None:
 def place(token_id: str, price: float):
     if DRY_RUN:
         return {"success": True, "dry_run": True}
-    r = session.post(f"{AGENTPIT_HOST}/order", timeout=30, json={
-        "token_id": token_id,
-        "side": "BUY",
-        "price": price,
-        "size": STAKE_SHARES,
-        "order_type": "GTC",
-    })
-    return r.json()
+    try:
+        return _request("POST", "/order", body={
+            "token_id": token_id,
+            "side": "BUY",
+            "price": price,
+            "size": STAKE_SHARES,
+            "order_type": "GTC",
+        })
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode()[:120]
+        return {"success": False, "errorMsg": f"HTTP {exc.code}: {detail}"}
 
 
 def read_json(path):
