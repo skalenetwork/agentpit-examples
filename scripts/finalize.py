@@ -13,7 +13,8 @@ import json
 import os
 import sys
 
-from common import DRY_RUN, EDGE_THRESHOLD, STAKE_SHARES, place, read_json
+from common import (DRY_RUN, EDGE_THRESHOLD, MAX_PLAUSIBLE_EDGE, STAKE_SHARES,
+                    place, read_json)
 
 
 def decide(edge: float, bid: float, ask: float) -> tuple[str, float] | None:
@@ -23,6 +24,8 @@ def decide(edge: float, bid: float, ask: float) -> tuple[str, float] | None:
     1 - (YES bid), since the outcomes always sum to 1. "The market is too high"
     is therefore a NO purchase, not a short.
     """
+    if abs(edge) > MAX_PLAUSIBLE_EDGE:
+        return None                  # too good to be true, and usually is
     if edge > EDGE_THRESHOLD:
         return "YES", ask
     if -edge > EDGE_THRESHOLD:
@@ -69,7 +72,9 @@ def main():
 
         call = decide(edge, bid, ask)
         if call is None:
-            print("     -> no edge, skip\n")
+            reason = ("implausible edge — check the resolution rules"
+                      if abs(edge) > MAX_PLAUSIBLE_EDGE else "no edge")
+            print(f"     -> {reason}, skip\n")
             skipped += 1
             continue
 

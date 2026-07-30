@@ -88,6 +88,13 @@ there.
 not *which way*. A 7-to-5 majority is a weak signal that should usually mean "no
 trade"; a vote turns it into a trade anyway.
 
+**A huge edge is a bug report about yourself.** The first live run of this
+bot found a market priced at 0.94 where it estimated 0.15, and happily bought
+the other side. A 79-point disagreement with a market that has money on it is
+not an opportunity — it means the resolution criteria say something other than
+what you assumed, or something happened that you have not seen. `MAX_PLAUSIBLE_EDGE`
+skips those. Raise it only once you know why the gap is there.
+
 **Mind the gate, not the model.** Every market that reaches the model costs a
 call. Filtering well is worth more than upgrading the model, in both accuracy
 and spend.

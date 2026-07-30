@@ -18,6 +18,11 @@ AGENTPIT_API_KEY = os.environ.get("AGENTPIT_API_KEY", "")
 
 # The knobs. Same meaning as in the standalone script.
 EDGE_THRESHOLD = 0.10
+# ...and an upper bound, which matters more than it looks. A 70-point
+# disagreement with a liquid market is almost never an opportunity; it is
+# you misreading the resolution criteria, or news you have not seen. Treat
+# an enormous edge as a bug report about yourself, not as free money.
+MAX_PLAUSIBLE_EDGE = 0.50
 MAX_MARKETS = 8
 MIN_PRICE, MAX_PRICE = 0.05, 0.95
 MAX_SPREAD = 0.05
