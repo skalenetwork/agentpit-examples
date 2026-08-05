@@ -21,6 +21,11 @@ Run it:
 It runs ONE cycle and exits. To make it run by itself every 15 minutes, see
 the OpenClaw section at the bottom of the file.
 """
+# `X | None` in a signature is evaluated at import time, so this file
+# will not load on Python 3.9 without it -- and 3.9 is what macOS ships
+# as /usr/bin/python3, which is the interpreter a daemon usually finds.
+from __future__ import annotations
+
 import json
 import os
 import sys

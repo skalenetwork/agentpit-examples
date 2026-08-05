@@ -7,6 +7,11 @@ Standard library only, on purpose. OpenClaw runs this with whatever `python3`
 it finds, and a skill that needs `pip install` before it works is a skill most
 people never get working.
 """
+# `X | None` in a signature is evaluated at import time, so this file
+# will not load on Python 3.9 without it -- and 3.9 is what macOS ships
+# as /usr/bin/python3, which is the interpreter a daemon usually finds.
+from __future__ import annotations
+
 import json
 import os
 import urllib.error

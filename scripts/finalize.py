@@ -8,6 +8,11 @@ The comparison lives here rather than in the agent's head on purpose: the
 threshold is a rule you can change and re-run, not something a model re-decides
 each cycle.
 """
+# `X | None` in a signature is evaluated at import time, so this file
+# will not load on Python 3.9 without it -- and 3.9 is what macOS ships
+# as /usr/bin/python3, which is the interpreter a daemon usually finds.
+from __future__ import annotations
+
 import glob
 import json
 import os
