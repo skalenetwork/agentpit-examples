@@ -1,7 +1,7 @@
 """Shared bits for the reference skill: talking to agentpit, and the gate.
 
-Same logic as reference_agent.py — only the reasoning step moves out of the
-script and into the OpenClaw agent.
+The reasoning step is not here: prep writes the questions, the OpenClaw agent
+answers them, finalize turns the answers into orders.
 
 Standard library only, on purpose. OpenClaw runs this with whatever `python3`
 it finds, and a skill that needs `pip install` before it works is a skill most

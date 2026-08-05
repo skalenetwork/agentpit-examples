@@ -1,55 +1,39 @@
 # agentpit examples
 
-Reference trading agents for [agentpit](https://agentpit.dev) — a paper-trading
+A reference trading agent for [agentpit](https://agentpit.dev) — a paper-trading
 exchange that mirrors real Polymarket order books. Real prices, real books, no
 real money.
 
-Two files' worth of agent, at two levels. Start with the script to see what an
-agent *is*; move to the skill when you want it running without you.
+One agent, packaged as an OpenClaw skill: install it, give it your key, and it
+trades on a schedule using the model OpenClaw already has. No second API key,
+nothing to `pip install`.
 
 ---
 
-## 1. The script — understand the loop
+## The skill
 
-[`reference_agent.py`](reference_agent.py) is the whole thing in one file:
-
-```
-market question -> model estimates a probability -> compare to the price
-                -> trade only when the gap is big enough to be worth it
-```
+[`SKILL.md`](SKILL.md) plus [`scripts/`](scripts/) split the loop the way
+OpenClaw expects: a deterministic prep step, **your reasoning**, a deterministic
+finalize step.
 
 ```bash
-pip install anthropic requests
-export AGENTPIT_API_KEY=...      # your agentpit profile page
-export ANTHROPIC_API_KEY=...     # your own model key, your own spend
-python reference_agent.py
-```
-
-It runs one cycle and exits, printing what it thought about each market and
-why it did or did not trade.
-
-## 2. The skill — let it run without you
-
-[`SKILL.md`](SKILL.md) plus [`scripts/`](scripts/) is the same logic packaged for
-[OpenClaw](https://openclaw.ai), split the way OpenClaw expects: a deterministic
-prep step, **your reasoning**, a deterministic finalize step.
-
-```bash
-openclaw skills install git:<this-repo>
-export AGENTPIT_API_KEY=...
+openclaw skills install git:https://github.com/skalenetwork/agentpit-examples
+openclaw config set skills.entries.agentpit-reference.env.AGENTPIT_API_KEY <your-key>
 openclaw cron add --every 15m "run the agentpit-reference skill"
 ```
 
-Two things change versus the script. The reasoning is done by the model OpenClaw
-already has configured, so there is no second API key. And a scheduler runs it,
-so it keeps going while you do something else — as long as the machine stays
-awake.
+The key goes in the skill's own config, not `export`: the cron runs inside the
+OpenClaw gateway, which does not see your shell's environment.
+
+The reasoning is done by the model OpenClaw already has configured, so there is
+no second API key to buy. A scheduler runs it, so it keeps going while you do
+something else — as long as the machine stays awake.
 
 ---
 
 ## What to expect
 
-**Run as-is, both of these lose money.** That is the honest baseline, and it is
+**Run as-is, this loses money.** That is the honest baseline, and it is
 worth understanding before you try to fix it.
 
 A liquid market price already aggregates the opinions of people with money at
@@ -106,7 +90,6 @@ SKILL.md                    what the agent is told to do
 scripts/common.py           agentpit client + the gate + the knobs
 scripts/prep.py             step 1: pick markets, write the questions
 scripts/finalize.py         step 3: compare to price, place orders
-reference_agent.py          standalone, one cycle, your own model key
 ```
 
 `SKILL.md` sits at the repository root because that is where `openclaw skills
